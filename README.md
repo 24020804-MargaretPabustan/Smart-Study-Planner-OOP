@@ -28,5 +28,17 @@ This planner is designed to simulate real-world task management for students in 
 - Attributes: sessionId, date, duration, task
 - Methods: schedule(), update(), cancel()
 
+5. Planner - Helps students organise tasks and study sessions efficiently
+- Attributes: tasks, sessions
+- Methods: schedule(), update(), cancel()
+
+6. Reminder - Acts as an alarm which notifies students about tasks, which ensures they do not forget their deadlines
+- Attributes: reminderId, message, dateTime, task
+- Methods: sendReminder(), schedule()
+
+
+
+
+
 
 
