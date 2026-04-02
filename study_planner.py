@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 # -------------------------
 # Task Class - Creates a task blueprint, can use it to create multiple tasks (each task object represents smth student needs to do)
 # -------------------------
@@ -229,7 +230,7 @@ class Subject:
     def addTask(self, task):
         """Adds a task to the subject and links the task back to this subject. Returns a confirmation message."""
         task.setSubject(self) # Link the task back to this subject
-        self.__tasks.append(task)
+        self.__tasks.append(task) #The task is added to the subject's internal task list (which explains the 2 loops in lines 289 to 291, where we loop through subjects and then tasks within each subject to get all tasks for the student)
         return f"Task '{task.getTitle()}' added to subject '{self.__name}'."
 
     
@@ -280,16 +281,15 @@ class Student:
             tasks.extend(subject.getTasks())
         return tasks
 
-    def getSchedule(self):
-        """Generates a schedule for all tasks, including study sessions if assigned."""
+    def getSimpleSchedule(self):
+        """Generates a simple list for all students' tasks, with their details"""
+        #Create an empty list called schedule, we will put all the task info inside this list
         schedule = []
+        #Loop through the subjects the student has
         for subject in self.__subjects:
+        #Loop through the tasks for each subject,add task details (title, subject name, deadline, status) to the schedule list
             for task in subject.getTasks():
-                studySession = task.getStudySession() if hasattr(task, 'getStudySession') else None
-                if studySession:
-                    schedule.append(studySession.schedule())
-                else:
-                    schedule.append(f"Task '{task.getTitle()}' (Subject: {subject.getName()}) has no scheduled study session yet.")
+                schedule.append(f"{task.getTitle()} (Subject: {subject.getName()}) - Deadline: {task.getDeadline()} - Status: {task.getStatus()}")
         return schedule
     
 
@@ -323,13 +323,29 @@ class Planner:
 
 
     def prioritizeTasks(self):
-            """Returns tasks sorted by subject priority and deadline."""
-            all_tasks = self.__student.getTasks()
+            """Returns tasks sorted by subject priority, status and deadline."""
+            #This method sorts the student's task based on priority, status and deadline
+            #Gets all task the student has
+            all_tasks = self.__student.getTasks() 
+            
+            #Orders task based on status (incomplete tasks come before complete tasks)
+            def status_order(status):
+                #Marks task incomplete with 0, and complete with 1, so that incomplete tasks are sorted first.
+                return 0 if status == "Incomplete" else 1 # Incomplete first
+            
+            #Make a new sorted list of tasks based on priority, status and deadline, using the current list all_tasks
             sorted_tasks = sorted(
                 all_tasks,
-                key=lambda t: (t.getSubject().getPriority(), t.getDeadline())
+                #key=lambda Tells python how to decide the order when sorting the list of tasks, looks at priority first, then status then deadline
+                key=lambda t: ( #t: Looks at one task at a time
+                    t.getSubject().getPriority(),#Get priority method from Subject class, lower number means higher priority will be sorted first
+                     status_order(t.getStatus()), #Get status of tasks first (From Task Class), those that are incomplete (0) will be sorted before complete (1)
+                    datetime.strptime(t.getDeadline(), "%Y-%m-%d"), #Looks at the task's deadline (Task Class), convert it into datetime format, earlier deadlines come first#
+                   
+                )
             )
             return sorted_tasks
+
 
     def suggestStudySession(self, default_duration=2, start_date=None):
             """Automatically suggests study sessions for tasks without a session."""
