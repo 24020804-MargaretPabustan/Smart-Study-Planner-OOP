@@ -13,6 +13,10 @@ class Task:
         self.__status = status
         self.__studySession = None  # Will later link to a StudySession object
         self.__subject = None  # Link the task back to a subject (e.g. Math, Science, etc.)
+    
+    def __str__(self):
+        subject_name = self.__subject.getName() if self.__subject else "No Subject"
+        return f"Task ID: {self.__taskId}, Title: {self.__title}, Description: {self.__description}, Deadline: {self.__deadline}, Status: {self.__status}, Subject: {subject_name}"
 
     #-------------------------
     # Getter Methods - Return values like taskId, title, description, deadline, status (One of the important OOP principles is Encapsulation, so I used getter methods to access private attributes safely)
@@ -106,6 +110,8 @@ class StudySession:
         self.__duration = duration
         self.__task = task
 
+    def __str__(self):
+        return f"Session ID: {self.__sessionId}, Date: {self.__date}, Duration: {self.__duration} hours, Task: {self.__task.getTitle()}"
     #-------------------------
     #Getter Methods - Return values like sessionId, date, duration, task
     #-------------------------
@@ -156,6 +162,10 @@ class Reminder:
         self.__message = message
         self.__dateTime = dateTime
         self.__task = task
+    
+    #Makes the reminder details readable#
+    def __str__(self):
+        return f"Reminder ID: {self.__reminderId}, Message: {self.__message}, Date/Time: {self.__dateTime}, Task: {self.__task.getTitle()}"
 
     #-------------------------
     #Getter Methods - Return values like reminderId, message, dateTime, task
@@ -205,6 +215,12 @@ class Subject:
         self.__priority = priority
         self.__tasks = []
 
+    
+
+    def __str__(self):
+        tasks_str = "\n    ".join(str(task) for task in self.__tasks) if self.__tasks else "No Tasks"
+        return f"Subject ID: {self.__subjectId}, Name: {self.__name}, Priority: {self.__priority}\n  Tasks:\n    {tasks_str}"
+
     #-------------------------
     #Getter Methods - Return values like subjectId, name, priority, tasks
     def getSubjectId(self):
@@ -230,7 +246,7 @@ class Subject:
     def addTask(self, task):
         """Adds a task to the subject and links the task back to this subject. Returns a confirmation message."""
         task.setSubject(self) # Link the task back to this subject
-        self.__tasks.append(task) #The task is added to the subject's internal task list (which explains the 2 loops in lines 289 to 291, where we loop through subjects and then tasks within each subject to get all tasks for the student)
+        self.__tasks.append(task) #The task is added to the subject's internal task list (which explains the 2 loops in lines 310 to 313, where we loop through subjects and then tasks within each subject to get all tasks for the student)
         return f"Task '{task.getTitle()}' added to subject '{self.__name}'."
 
     
@@ -248,6 +264,11 @@ class Student:
         self.__email = email
         self.__subjects = []
     
+    #Prints Student details in a clean string format
+    def __str__(self):
+    #This is telling python to structure the list content nicely if the list exists, ifnot just display No Subjects
+        subjects_str = "\n  ".join(str(subject) for subject in self.__subjects) if self.__subjects else "No Subjects"
+        return f"Student ID: {self.__studentId}, Name: {self.__name}, Email: {self.__email}\nSubjects:\n  {subjects_str}"
     #-------------------------
     #Getter methods - Return values like studentId, name, email, subjects
     def getStudentId(self):
@@ -368,4 +389,105 @@ class Planner:
 # -------------------------
 # TEST CODE
 # -------------------------
-# Create student
+# 1. Initialise Student object and display their details
+student = Student(studentId = "S001", name = "Sarah", email = "sarah@example.com")
+print("=== Student Info ===")
+print(student)
+print()
+# 2. Initialise Subjects and display their details (e.g. subjectId/code, name, priority)
+devops = Subject(subjectId = "C237", name = "DevOps", priority = 1)
+math = Subject(subjectId = "M101", name = "Mathematics", priority = 2)
+networking = Subject(subjectId = "C326", name = "Networking", priority = 3)
+
+print("=== Subjects before adding them to student's planner ===")
+print(devops)
+print(math)
+print(networking)
+print()
+
+#Add subjects to student
+student.addSubject(devops)
+student.addSubject(math)
+
+print("=== After Adding Subjects to Student's planner ===")
+print(student)
+print()
+
+print(devops)
+print(math)
+
+# 3. Initialise Task objects
+task1 = Task(taskId = "T001", title = "Complete DevOps Assignment", description = "Finish DevOps Pipeline assignment.", deadline = "2026-10-01")
+task2 = Task(taskId = "T002", title = "Review Lecture Notes", description = "Go through the mathematics lecture notes and highlight key points.", deadline = "2026-10-02")
+task3 = Task(taskId = "T003", title = "Practice Networking Commands", description = "Solve ACL and NAT exercises.", deadline = "2026-10-03")
+
+print ("=== Tasks before adding them to subjects ===")
+print(task1)
+print(task2)
+print(task3)
+
+# Add tasks to subjects
+devops.addTask(task1)
+math.addTask(task2)
+networking.addTask(task3)
+
+print("=== After Adding Tasks to Subjects ===")
+
+print(devops)
+print(math)
+print(networking)
+
+#4. Initialise study sessions that are linked to tasks (Creates a study tracker for students)
+session1 = StudySession(sessionId="SS001", date = "2026-10-01", duration=2, task=task1)
+session2 = StudySession(sessionId="SS002", date = "2026-10-02", duration=1.5, task=task2)
+session3 = StudySession(sessionId="SS003", date = "2026-10-03", duration=3, task=task3)
+
+# Set study session for tasks (Linking each study sessions to its respective task)
+# For this assignment/revision task, the student studied for this duration
+#It's essentially a study tracker
+
+
+task1.setStudySession(session1)
+task2.setStudySession(session2)
+task3.setStudySession(session3)
+
+print("=== Study Sessions ===")
+print(session1)
+print(session2)
+
+#5. Create reminders for tasks
+reminder1 = Reminder(reminderId = "R001", message = "Start DevOps Assignment", dateTime = "2026-10-01 12:00", task=task1)
+reminder2 = Reminder(reminderId = "R002", message = "Start Revising Math Lecture Notes", dateTime = "2026-10-01 14:00", task=task2)
+reminder3 = Reminder(reminderId = "R003", message = "Start Doing Networking Practical ", dateTime = "2026-10-01 16:00", task=task3)
+
+print("=== Reminders ===")
+print(reminder1)
+print(reminder2)
+print(reminder3)
+
+# 6. Generate student's simple schedule
+print("=== Simple Schedule ===")
+for s in student.getSimpleSchedule():
+    print(s)
+print()
+
+# 7. Use Planner to prioritize tasks and suggest study sessions
+planner = Planner(student)
+
+print("=== Suggested Study Sessions ===")
+suggestions = planner.suggestStudySession(default_duration=2, start_date="2026-04-07")
+if suggestions:
+    for s in suggestions:
+        print(s)
+else:
+    print("All tasks already have study sessions.")
+print()
+
+print("=== Reminders ===")
+for r in [reminder1, reminder2, reminder3]:
+    print(r.sendReminder())
+print()
+
+print("=== Simple Schedule ===")
+for s in student.getSimpleSchedule():
+    print(s)
